@@ -370,36 +370,36 @@ std::string FlowCapacitatedNetwork::toString()
     std::vector<std::string> sortedCapacityMatrix;
 
     for (const auto& [start, neighbors] : this->capacityMatrix) {
-        for (const auto& [end, capacity] : neighbors) sortedCapacityMatrix.emplace_back("\t C(" + start + ", " + end + ") = " + std::to_string(capacity) + "\n");
+        for (const auto& [end, capacity] : neighbors) sortedCapacityMatrix.emplace_back("\tC(" + start + ", " + end + ") = " + std::to_string(capacity) + "\n");
     }
 
     alphanumSort(sortedCapacityMatrix);
 
     for (const auto& capacity : sortedCapacityMatrix) output += capacity;
 
-    output += "Flow Matrix:\n";
+    // output += "Flow Matrix:\n";
     
-    std::vector<std::string> sortedFlowMatrix;
+    // std::vector<std::string> sortedFlowMatrix;
 
-    for (const auto& [start, neighbors] : this->flowMatrix) {
-        for (const auto& [end, capacity] : neighbors) sortedFlowMatrix.emplace_back("\t F(" + start + ", " + end + ") = " + std::to_string(capacity) + "\n");
-    }
+    // for (const auto& [start, neighbors] : this->flowMatrix) {
+    //     for (const auto& [end, capacity] : neighbors) sortedFlowMatrix.emplace_back("\t F(" + start + ", " + end + ") = " + std::to_string(capacity) + "\n");
+    // }
 
-    alphanumSort(sortedFlowMatrix);
+    // alphanumSort(sortedFlowMatrix);
 
-    for (const auto& capacity : sortedCapacityMatrix) output += capacity;
+    // for (const auto& capacity : sortedFlowMatrix) output += capacity;
 
-    output += "Residual Flow Matrix:\n";
+    // output += "Residual Flow Matrix:\n";
     
-    std::vector<std::string> sortedResidualMatrix;
+    // std::vector<std::string> sortedResidualMatrix;
 
-    for (const auto& [start, neighbors] : this->residualMatrix) {
-        for (const auto& [end, capacity] : neighbors) sortedResidualMatrix.emplace_back("\t R(" + start + ", " + end + ") = " + std::to_string(capacity) + "\n");
-    }
+    // for (const auto& [start, neighbors] : this->residualMatrix) {
+    //     for (const auto& [end, capacity] : neighbors) sortedResidualMatrix.emplace_back("\t R(" + start + ", " + end + ") = " + std::to_string(capacity) + "\n");
+    // }
 
-    alphanumSort(sortedResidualMatrix);
+    // alphanumSort(sortedResidualMatrix);
 
-    for (const auto& capacity : sortedResidualMatrix) output += capacity;
+    // for (const auto& capacity : sortedResidualMatrix) output += capacity;
 
     return output;
 };
