@@ -12,6 +12,14 @@ size_t std::hash<Edge>::operator()(const Edge& edge) const
     return startHash ^ endHash ^ edge.capacity;
 };
 
+size_t std::hash<std::pair<std::string, std::string>>::operator()(const std::pair<std::string, std::string>& edge) const
+{
+    size_t startHash = std::hash<std::string>()(edge.first);
+    size_t endHash = std::hash<std::string>()(edge.second);
+
+    return startHash ^ endHash;
+};
+
 FlowCapacitatedNetwork::FlowCapacitatedNetwork(std::unordered_set<std::string> nodes, std::string source, std::string terminal, std::unordered_set<Edge> edges)
 {
     this->nodes = nodes;
@@ -40,6 +48,76 @@ FlowCapacitatedNetwork FlowCapacitatedNetwork::fromEdgeCapacitated(std::unordere
     }
 
     return FlowCapacitatedNetwork(nodes, source, terminal, edges);
+};
+
+FlowCapacitatedNetwork FlowCapacitatedNetwork::fromVertexCapacitated(std::unordered_set<std::string> nodes, std::string source, std::string terminal, std::unordered_set<std::pair<std::string, std::string>> edges, std::unordered_map<std::string, int> vertexCapacity)
+{
+    if (vertexCapacity.contains(source) || vertexCapacity.contains(terminal)) throw std::runtime_error("FlowCapacitatedNetwork fromVertexCapacitated: source and terminal cannot have a capacity");
+
+    std::unordered_set<std::string> splitNodes;
+    splitNodes.insert(source + "-out");
+    splitNodes.insert(terminal + "-in");
+
+    int maxCapacity = 0;
+
+    for (const auto& [node, capacity] : vertexCapacity) {
+        if (!nodes.contains(node)) throw std::runtime_error("FlowCapacitatedNetwork fromVertexCapacitated: vertex capacity contains invalid node");
+
+        if (node.contains('-')) throw std::runtime_error("FlowCapacitatedNetwork fromVertexCapacitated: node name cannot have dashes");
+
+        if (capacity < 0) throw std::runtime_error("FlowCapacitatedNetwork fromVertexCapacitated: vertex capacity cannot be negative");
+
+        splitNodes.insert(node + "-in");
+        splitNodes.insert(node + "-out");
+
+        maxCapacity += capacity;
+    }
+
+    if (vertexCapacity.size() != nodes.size() - 2) throw std::runtime_error("FlowCapacitatedNetwork fromVertexCapacitated: every internal node must have an explicit capacity");
+
+    std::unordered_set<Edge> edgesWithCapacities;
+
+    for (const auto& [start, end] : edges) edgesWithCapacities.emplace(start + "-out",  end + "-in", maxCapacity);
+
+    for (const auto& [node, capacity] : vertexCapacity) {
+        edgesWithCapacities.emplace(node + "-in", node + "-out", capacity);
+        edgesWithCapacities.emplace(node + "-out", node + "-in", capacity);
+    }
+
+    return FlowCapacitatedNetwork::fromEdgeCapacitated(splitNodes, source + "-out", terminal + "-in", edgesWithCapacities);
+};
+
+FlowCapacitatedNetwork FlowCapacitatedNetwork::fromEdgeAndVertexCapacitated(std::unordered_set<std::string> nodes, std::string source, std::string terminal, std::unordered_set<Edge> edges, std::unordered_map<std::string, int> vertexCapacity)
+{
+    if (vertexCapacity.contains(source) || vertexCapacity.contains(terminal)) throw std::runtime_error("FlowCapacitatedNetwork fromEdgeAndVertexCapacitated: source and terminal cannot have a capacity");
+
+    std::unordered_set<std::string> splitNodes;
+    splitNodes.insert(source + "-out");
+    splitNodes.insert(terminal + "-in");
+
+    for (const auto& [node, capacity] : vertexCapacity) {
+        if (!nodes.contains(node)) throw std::runtime_error("FlowCapacitatedNetwork fromVertexCapacitated: vertex capacity contains invalid node");
+
+        if (node.contains('-')) throw std::runtime_error("FlowCapacitatedNetwork fromVertexCapacitated: node name cannot have dashes");
+
+        if (capacity < 0) throw std::runtime_error("FlowCapacitatedNetwork fromVertexCapacitated: vertex capacity cannot be negative");
+
+        splitNodes.insert(node + "-in");
+        splitNodes.insert(node + "-out");
+    }
+
+    if (vertexCapacity.size() != nodes.size() - 2) throw std::runtime_error("FlowCapacitatedNetwork fromVertexCapacitated: every internal node must have an explicit capacity");
+
+    std::unordered_set<Edge> edgesWithCapacities;
+
+    for (const auto& edge : edges) edgesWithCapacities.emplace(edge.start + "-out",  edge.end + "-in", edge.capacity);
+
+    for (const auto& [node, capacity] : vertexCapacity) {
+        edgesWithCapacities.emplace(node + "-in", node + "-out", capacity);
+        edgesWithCapacities.emplace(node + "-out", node + "-in", capacity);
+    }
+
+    return FlowCapacitatedNetwork::fromEdgeCapacitated(splitNodes, source + "-out", terminal + "-in", edgesWithCapacities);
 };
 
 int FlowCapacitatedNetwork::getFlow()

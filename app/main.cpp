@@ -4,7 +4,7 @@
 
 int main()
 {
-    FlowCapacitatedNetwork network = FlowCapacitatedNetwork::fromEdgeCapacitated(
+    FlowCapacitatedNetwork network1 = FlowCapacitatedNetwork::fromEdgeCapacitated(
         { "S", "A", "B", "C", "D", "T" },
         "S",
         "T",
@@ -20,12 +20,52 @@ int main()
             Edge("D", "T", 3)
         }
     );
+    
+    FlowCapacitatedNetwork network2 = FlowCapacitatedNetwork::fromVertexCapacitated(
+        { "S", "A", "B", "C", "D", "T" },
+        "S",
+        "T",
+        {
+            { "S", "A" },
+            { "S", "B" },
 
-    std::cout << "Initial Network:" << std::endl << network.toString();
-    std::cout << "Flow: " << network.getFlow() << std::endl << std::endl;
+            { "A", "C" },
+            { "B", "D" },
 
-    network.maximizeFlow();
+            { "C", "T" },
+            { "D", "T" },
+        },
+        {
+            { "A", 2 },
+            { "B", 5 },
+            { "C", 3 },
+            { "D", 4 }
+        }
+    );
 
-    std::cout << "Final Network:" << std::endl << network.toString();
-    std::cout << "Flow: " << network.getFlow() << std::endl << std::endl;
+    FlowCapacitatedNetwork network3 = FlowCapacitatedNetwork::fromEdgeAndVertexCapacitated(
+        { "S", "A", "B", "C", "D", "T" },
+        "S",
+        "T",
+        {
+            Edge("S", "A", 1),
+            Edge("S", "B", 1),
+
+            Edge("A", "C", 1),
+            Edge("B", "D", 1),
+
+            Edge("C", "T", 1),
+            Edge("D", "T", 1)
+        },
+        {
+            { "A", 2 },
+            { "B", 5 },
+            { "C", 3 },
+            { "D", 4 }
+        }
+    );
+
+    network3.maximizeFlow();
+
+    std::cout << "flow: " << network3.getFlow();
 };
