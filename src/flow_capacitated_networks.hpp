@@ -48,8 +48,8 @@ class FlowCapacitatedNetwork
         static FlowCapacitatedNetwork fromEdgeAndVertexCapacitated(std::unordered_set<std::string> nodes, std::string source, std::string terminal, std::unordered_set<Edge> edges, std::unordered_map<std::string, int> vertexCapacity);
         
         static FlowCapacitatedNetwork fromMultiBoundaryEdgeCapacitated(std::unordered_set<std::string> nodes, std::unordered_set<std::string> sources, std::unordered_set<std::string> terminals, std::unordered_set<Edge> edges);
-        static FlowCapacitatedNetwork fromMultiBoundaryVertexCapacitated(std::unordered_set<std::string> nodes, std::unordered_set<std::string> sources, std::unordered_set<std::string> terminals, std::unordered_map<std::string, int> vertexCapacity);
-        static FlowCapacitatedNetwork fromMultiBoundaryEdgeAndVertexCapacitated(std::unordered_set<std::string> nodes, std::unordered_set<std::string> sources, std::unordered_set<std::string> terminals, std::unordered_map<std::string, int> vertexCapacity);
+        static FlowCapacitatedNetwork fromMultiBoundaryVertexCapacitated(std::unordered_set<std::string> nodes, std::unordered_set<std::string> sources, std::unordered_set<std::string> terminals, std::unordered_set<std::pair<std::string, std::string>> edges, std::unordered_map<std::string, int> vertexCapacity);
+        static FlowCapacitatedNetwork fromMultiBoundaryEdgeAndVertexCapacitated(std::unordered_set<std::string> nodes, std::unordered_set<std::string> sources, std::unordered_set<std::string> terminals, std::unordered_set<Edge> edges, std::unordered_map<std::string, int> vertexCapacity);
 
         int getFlow();
 
