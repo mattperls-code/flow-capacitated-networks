@@ -125,4 +125,6 @@ int main()
             { "D", 4 }
         }
     );
+
+    std::cout << network1.toString() << std::endl;
 };

@@ -1,6 +1,8 @@
 #include <iostream>
 #include <stdexcept>
 #include <queue>
+#include <algorithm>
+#include <vector>
 
 #include "flow_capacitated_networks.hpp"
 
@@ -18,6 +20,29 @@ size_t std::hash<std::pair<std::string, std::string>>::operator()(const std::pai
     size_t endHash = std::hash<std::string>()(edge.second);
 
     return startHash ^ endHash;
+};
+
+int getMaxCapacity(std::unordered_map<std::string, int> vertexCapacity)
+{
+    int maxCapacity = 0;
+
+    for (const auto& [_, capacity] : vertexCapacity) maxCapacity = std::max(maxCapacity, capacity);
+
+    return maxCapacity;
+};
+
+int getMaxCapacity(std::unordered_set<Edge> edges)
+{
+    int maxCapacity = 0;
+
+    for (const auto& edge : edges) maxCapacity = std::max(maxCapacity, edge.capacity);
+
+    return maxCapacity;
+};
+
+int getMaxCapacity(std::unordered_map<std::string, int> vertexCapacity, std::unordered_set<Edge> edges)
+{
+    return std::max(getMaxCapacity(vertexCapacity), getMaxCapacity(edges));
 };
 
 FlowCapacitatedNetwork::FlowCapacitatedNetwork(std::unordered_set<std::string> nodes, std::string source, std::string terminal, std::unordered_set<Edge> edges)
@@ -43,6 +68,9 @@ FlowCapacitatedNetwork FlowCapacitatedNetwork::fromEdgeCapacitated(std::unordere
 
     for (const auto& edge : edges) {
         if (!nodes.contains(edge.start) || !nodes.contains(edge.end)) throw std::runtime_error("FlowCapacitatedNetwork constructor: edge contains invalid node");
+
+        if (edge.end == source) throw std::runtime_error("FlowCapacitatedNetwork constructor: edge cannot end at source");
+        if (edge.start == terminal) throw std::runtime_error("FlowCapacitatedNetwork constructor: edge cannot start at terminal");
         
         if (edge.capacity < 0) throw std::runtime_error("FlowCapacitatedNetwork constructor: edge capacity cannot be negative");
     }
@@ -52,9 +80,7 @@ FlowCapacitatedNetwork FlowCapacitatedNetwork::fromEdgeCapacitated(std::unordere
 
 FlowCapacitatedNetwork FlowCapacitatedNetwork::fromVertexCapacitated(std::unordered_set<std::string> nodes, std::string source, std::string terminal, std::unordered_set<std::pair<std::string, std::string>> edges, std::unordered_map<std::string, int> vertexCapacity)
 {
-    int maxCapacity = 0;
-
-    for (const auto& [node, capacity] : vertexCapacity) maxCapacity += capacity;
+    int maxCapacity = getMaxCapacity(vertexCapacity);
 
     std::unordered_set<Edge> edgesWithCapacities;
 
@@ -68,8 +94,8 @@ FlowCapacitatedNetwork FlowCapacitatedNetwork::fromEdgeAndVertexCapacitated(std:
     if (vertexCapacity.contains(source) || vertexCapacity.contains(terminal)) throw std::runtime_error("FlowCapacitatedNetwork constructor: source and terminal cannot have a capacity");
 
     std::unordered_set<std::string> splitNodes;
-    splitNodes.insert(source + "-out");
-    splitNodes.insert(terminal + "-in");
+    splitNodes.emplace(source + "-out");
+    splitNodes.emplace(terminal + "-in");
 
     for (const auto& [node, capacity] : vertexCapacity) {
         if (!nodes.contains(node)) throw std::runtime_error("FlowCapacitatedNetwork constructor: vertex capacity contains invalid node");
@@ -78,8 +104,8 @@ FlowCapacitatedNetwork FlowCapacitatedNetwork::fromEdgeAndVertexCapacitated(std:
 
         if (capacity < 0) throw std::runtime_error("FlowCapacitatedNetwork constructor: vertex capacity cannot be negative");
 
-        splitNodes.insert(node + "-in");
-        splitNodes.insert(node + "-out");
+        splitNodes.emplace(node + "-in");
+        splitNodes.emplace(node + "-out");
     }
 
     if (vertexCapacity.size() != nodes.size() - 2) throw std::runtime_error("FlowCapacitatedNetwork constructor: every internal node must have an explicit capacity");
@@ -100,12 +126,10 @@ FlowCapacitatedNetwork FlowCapacitatedNetwork::fromMultiBoundaryEdgeCapacitated(
 {
     for (const auto& node : nodes) if (node.contains("$")) throw std::runtime_error("FlowCapacitatesNetwork constructor: node name cannot have $");
 
-    nodes.insert("$S");
-    nodes.insert("$T");
+    nodes.emplace("$S");
+    nodes.emplace("$T");
 
-    int maxCapacity = 0;
-
-    for (const auto& edge : edges) maxCapacity += edge.capacity;
+    int maxCapacity = getMaxCapacity(edges);
 
     for (const auto& source : sources) edges.emplace("$S", source, maxCapacity);
     for (const auto& terminal : terminals) edges.emplace(terminal, "$T", maxCapacity);
@@ -117,12 +141,10 @@ FlowCapacitatedNetwork FlowCapacitatedNetwork::fromMultiBoundaryVertexCapacitate
 {
     for (const auto& node : nodes) if (node.contains("$")) throw std::runtime_error("FlowCapacitatesNetwork constructor: node name cannot have $");
 
-    nodes.insert("$S");
-    nodes.insert("$T");
+    nodes.emplace("$S");
+    nodes.emplace("$T");
 
-    int maxCapacity = 0;
-
-    for (const auto& [_, capacity] : vertexCapacity) maxCapacity += capacity;
+    int maxCapacity = getMaxCapacity(vertexCapacity);
 
     for (const auto& source : sources) {
         edges.emplace("$S", source);
@@ -141,12 +163,10 @@ FlowCapacitatedNetwork FlowCapacitatedNetwork::fromMultiBoundaryEdgeAndVertexCap
 {
     for (const auto& node : nodes) if (node.contains("$")) throw std::runtime_error("FlowCapacitatesNetwork constructor: node name cannot have $");
 
-    nodes.insert("$S");
-    nodes.insert("$T");
+    nodes.emplace("$S");
+    nodes.emplace("$T");
 
-    int maxCapacity = 0;
-
-    for (const auto& [_, capacity] : vertexCapacity) maxCapacity += capacity;
+    int maxCapacity = getMaxCapacity(vertexCapacity, edges);
 
     for (const auto& source : sources) {
         edges.emplace("$S", source, maxCapacity);
@@ -182,7 +202,7 @@ std::pair<std::unordered_set<std::string>, std::unordered_set<std::string>> Flow
         std::string currNode = queue.front();
         queue.pop();
 
-        reachableFromSource.insert(currNode);
+        reachableFromSource.emplace(currNode);
         unreachableFromSource.erase(currNode);
 
         for (const auto& [neighbor, flow] : this->residualMatrix[currNode]) if (!reachableFromSource.contains(neighbor) && flow > 0) queue.push(neighbor);
@@ -296,13 +316,46 @@ void FlowCapacitatedNetwork::maximizeFlow()
     }
 };
 
+bool alphanumLess(const std::string& a, const std::string& b) {
+    size_t i = 0, j = 0;
+    while (i < a.size() && j < b.size()) {
+        if (std::isdigit(a[i]) && std::isdigit(b[j])) {
+            size_t ia = i, ib = j;
+            while (ia < a.size() && std::isdigit(a[ia])) ++ia;
+            while (ib < b.size() && std::isdigit(b[ib])) ++ib;
+            
+            int numA = std::stoi(a.substr(i, ia - i));
+            int numB = std::stoi(b.substr(j, ib - j));
+            
+            if (numA != numB) return numA < numB;
+            i = ia;
+            j = ib;
+        } else {
+            if (a[i] != b[j]) return a[i] < b[j];
+            ++i;
+            ++j;
+        }
+    }
+    return a.size() < b.size();
+}
+
+void alphanumSort(std::vector<std::string>& v) {
+    std::sort(v.begin(), v.end(), alphanumLess);
+}
+
 std::string FlowCapacitatedNetwork::toString()
 {
     std::string output;
 
     output += "Nodes: ";
 
-    for (const auto& node : this->nodes) output += node + ", ";
+    std::vector<std::string> sortedNodes;
+
+    for (const auto& node : this->nodes) sortedNodes.emplace_back(node + ", ");
+
+    alphanumSort(sortedNodes);
+
+    for (const auto& node : sortedNodes) output += node;
 
     output.pop_back();
     output.pop_back();
@@ -314,21 +367,39 @@ std::string FlowCapacitatedNetwork::toString()
 
     output += "Capacity Matrix:\n";
 
+    std::vector<std::string> sortedCapacityMatrix;
+
     for (const auto& [start, neighbors] : this->capacityMatrix) {
-        for (const auto& [end, capacity] : neighbors) output += "\t C(" + start + ", " + end + ") = " + std::to_string(capacity) + "\n";
+        for (const auto& [end, capacity] : neighbors) sortedCapacityMatrix.emplace_back("\t C(" + start + ", " + end + ") = " + std::to_string(capacity) + "\n");
     }
+
+    alphanumSort(sortedCapacityMatrix);
+
+    for (const auto& capacity : sortedCapacityMatrix) output += capacity;
 
     output += "Flow Matrix:\n";
+    
+    std::vector<std::string> sortedFlowMatrix;
 
     for (const auto& [start, neighbors] : this->flowMatrix) {
-        for (const auto& [end, flow] : neighbors) output += "\t F(" + start + ", " + end + ") = " + std::to_string(flow) + "\n";
+        for (const auto& [end, capacity] : neighbors) sortedFlowMatrix.emplace_back("\t F(" + start + ", " + end + ") = " + std::to_string(capacity) + "\n");
     }
+
+    alphanumSort(sortedFlowMatrix);
+
+    for (const auto& capacity : sortedCapacityMatrix) output += capacity;
 
     output += "Residual Flow Matrix:\n";
+    
+    std::vector<std::string> sortedResidualMatrix;
 
     for (const auto& [start, neighbors] : this->residualMatrix) {
-        for (const auto& [end, residualFlow] : neighbors) output += "\t R(" + start + ", " + end + ") = " + std::to_string(residualFlow) + "\n";
+        for (const auto& [end, capacity] : neighbors) sortedResidualMatrix.emplace_back("\t R(" + start + ", " + end + ") = " + std::to_string(capacity) + "\n");
     }
+
+    alphanumSort(sortedResidualMatrix);
+
+    for (const auto& capacity : sortedResidualMatrix) output += capacity;
 
     return output;
 };
