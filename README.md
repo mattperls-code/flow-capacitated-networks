@@ -3,7 +3,7 @@
 Determine the max flow through various types of capacitated networks.
 
 The library supports operations on edge and vertex capacitated networks with any amount of sources and terminals.
-The ```FlowCapacitatedNetwork``` class automatically generates and manages residual graphs, performs path augmentation and iterative flow maximization, finds max cuts, and exports capacity, flow, and residual graphs as DOT or image files.
+The ```FlowCapacitatedNetwork``` class automatically generates and manages residual graphs, performs path augmentation and iterative flow maximization, finds min cuts, and exports capacity, flow, and residual graphs as DOT or image files.
 
 ## Examples
 
