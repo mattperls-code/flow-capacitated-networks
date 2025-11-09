@@ -4,17 +4,17 @@
 
 void exportDemo(FlowCapacitatedNetwork network, std::string name)
 {
-    network.exportCapacityGraph("./results/" + name, "capacity");
+    network.exportCapacityGraph("./examples/" + name, "capacity");
 
     network.augment();
 
-    network.exportFlowGraph("./results/" + name, "flow-augmented");
-    network.exportResidualGraph("./results/" + name, "residual-augmented");
+    network.exportFlowGraph("./examples/" + name, "flow-augmented");
+    network.exportResidualGraph("./examples/" + name, "residual-augmented");
 
     network.maximizeFlow();
 
-    network.exportFlowGraph("./results/" + name, "flow-maximized");
-    network.exportResidualGraph("./results/" + name, "residual-maximized");
+    network.exportFlowGraph("./examples/" + name, "flow-maximized");
+    network.exportResidualGraph("./examples/" + name, "residual-maximized");
 };
 
 int main()
@@ -34,7 +34,7 @@ int main()
             Edge("D", "B", 1),
             Edge("D", "T", 3)
         }
-    ), "network1");
+    ), "demo1");
 
     exportDemo(FlowCapacitatedNetwork::fromEdgeAndVertexCapacitated(
         { "S", "A", "B", "C", "D", "E", "T" },
@@ -63,7 +63,7 @@ int main()
             { "D", 3 },
             { "E", 3 },
         }
-    ), "network2");
+    ), "demo2");
     
     exportDemo(FlowCapacitatedNetwork::fromMultiBoundaryEdgeAndVertexCapacitated(
         { "S1", "S2", "A", "B", "C", "D", "T1", "T2" },
@@ -85,5 +85,5 @@ int main()
             { "C", 12 },
             { "D", 8 }
         }
-    ), "network3");
+    ), "demo3");
 };
