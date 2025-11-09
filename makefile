@@ -1,12 +1,11 @@
 CXX := g++
-CXXFLAGS := -std=c++23 -Ilib -Isrc -Wall -Wextra -Wno-sign-compare
+CXXFLAGS := -std=c++23 -Isrc -Wall -Wextra -Wno-sign-compare
 
 SRC_DIR := src
-LIB_DIR := lib
 APP_DIR := app
 TEST_DIR := tests
 
-IMPL_SOURCES := $(shell find $(SRC_DIR) $(LIB_DIR) -name '*.cpp')
+IMPL_SOURCES := $(shell find $(SRC_DIR) -name '*.cpp')
 
 APP_MAIN := $(APP_DIR)/main.cpp
 

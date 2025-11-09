@@ -1,0 +1,22 @@
+digraph FlowGraph {
+	rankdir=LR;
+	nodesep=1.0;
+	ranksep=1.0;
+	"S" [shape=circle, style=filled, fillcolor=lightblue, penwidth=3, fontsize=20];
+	"T" [shape=circle, style=filled, fillcolor=lightcoral, penwidth=3, fontsize=20];
+	{ rank=min; "S"; }
+	{ rank=max; "T"; }
+	"C" [shape=circle, fontsize=20];
+	"A" [shape=circle, fontsize=20];
+	"D" [shape=circle, fontsize=20];
+	"B" [shape=circle, fontsize=20];
+	"C" -> "D" [label="3/3", fontsize=20];
+	"A" -> "B" [label="2/3", fontsize=20];
+	"B" -> "T" [label="2/4", fontsize=20];
+	"B" -> "C" [label="0/3", fontsize=20];
+	"A" -> "C" [label="0/1", fontsize=20];
+	"D" -> "T" [label="3/3", fontsize=20];
+	"D" -> "B" [label="0/1", fontsize=20];
+	"S" -> "C" [label="3/4", fontsize=20];
+	"S" -> "A" [label="2/2", fontsize=20];
+}

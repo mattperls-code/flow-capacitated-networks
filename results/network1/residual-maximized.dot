@@ -1,0 +1,25 @@
+digraph ResidualGraph {
+	rankdir=LR;
+	nodesep=1.0;
+	ranksep=1.0;
+	"S" [shape=circle, style=filled, fillcolor=lightblue, penwidth=3, fontsize=20];
+	"T" [shape=circle, style=filled, fillcolor=lightcoral, penwidth=3, fontsize=20];
+	{ rank=min; "S"; }
+	{ rank=max; "T"; }
+	"C" [shape=circle, fontsize=20];
+	"A" [shape=circle, fontsize=20];
+	"D" [shape=circle, fontsize=20];
+	"B" [shape=circle, fontsize=20];
+	"T" -> "B" [label="2", fontsize=20];
+	"D" -> "B" [label="1", fontsize=20];
+	"T" -> "D" [label="3", fontsize=20];
+	"A" -> "C" [label="1", fontsize=20];
+	"D" -> "C" [label="3", fontsize=20];
+	"A" -> "B" [label="1", fontsize=20];
+	"A" -> "S" [label="2", fontsize=20];
+	"B" -> "C" [label="3", fontsize=20];
+	"C" -> "S" [label="3", fontsize=20];
+	"B" -> "A" [label="2", fontsize=20];
+	"B" -> "T" [label="2", fontsize=20];
+	"S" -> "C" [label="1", fontsize=20];
+}

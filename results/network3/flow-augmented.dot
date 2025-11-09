@@ -1,0 +1,53 @@
+digraph FlowGraph {
+	rankdir=LR;
+	nodesep=1.0;
+	ranksep=1.0;
+	"$S-out" [shape=circle, style=filled, fillcolor=lightblue, penwidth=3, fontsize=20];
+	"$T-in" [shape=circle, style=filled, fillcolor=lightcoral, penwidth=3, fontsize=20];
+	{ rank=min; "$S-out"; }
+	{ rank=max; "$T-in"; }
+	"T1-in" [shape=circle, fontsize=20];
+	"B-in" [shape=circle, fontsize=20];
+	"T1-out" [shape=circle, fontsize=20];
+	"A-in" [shape=circle, fontsize=20];
+	"T2-out" [shape=circle, fontsize=20];
+	"B-out" [shape=circle, fontsize=20];
+	"D-in" [shape=circle, fontsize=20];
+	"C-in" [shape=circle, fontsize=20];
+	"D-out" [shape=circle, fontsize=20];
+	"S2-in" [shape=circle, fontsize=20];
+	"T2-in" [shape=circle, fontsize=20];
+	"A-out" [shape=circle, fontsize=20];
+	"C-out" [shape=circle, fontsize=20];
+	"S1-in" [shape=circle, fontsize=20];
+	"S1-out" [shape=circle, fontsize=20];
+	"S2-out" [shape=circle, fontsize=20];
+	"C-out" -> "B-in" [label="0/8", fontsize=20];
+	"B-out" -> "D-in" [label="0/5", fontsize=20];
+	"C-in" -> "C-out" [label="0/12", fontsize=20];
+	"A-in" -> "A-out" [label="4/5", fontsize=20];
+	"T2-in" -> "T2-out" [label="0/85", fontsize=20];
+	"D-out" -> "T2-in" [label="0/9", fontsize=20];
+	"T1-out" -> "$T-in" [label="4/85", fontsize=20];
+	"T1-in" -> "T1-out" [label="4/85", fontsize=20];
+	"A-out" -> "A-in" [label="0/5", fontsize=20];
+	"T2-out" -> "$T-in" [label="0/85", fontsize=20];
+	"D-in" -> "D-out" [label="0/8", fontsize=20];
+	"D-out" -> "D-in" [label="0/8", fontsize=20];
+	"S2-in" -> "S2-out" [label="0/85", fontsize=20];
+	"C-out" -> "D-in" [label="0/5", fontsize=20];
+	"A-out" -> "T1-in" [label="4/4", fontsize=20];
+	"A-out" -> "B-in" [label="0/4", fontsize=20];
+	"S1-in" -> "S1-out" [label="4/85", fontsize=20];
+	"T2-out" -> "T2-in" [label="0/85", fontsize=20];
+	"C-out" -> "C-in" [label="0/12", fontsize=20];
+	"B-in" -> "B-out" [label="0/10", fontsize=20];
+	"$S-out" -> "S2-in" [label="0/85", fontsize=20];
+	"$S-out" -> "S1-in" [label="4/85", fontsize=20];
+	"B-out" -> "B-in" [label="0/10", fontsize=20];
+	"T1-out" -> "T1-in" [label="0/85", fontsize=20];
+	"S2-out" -> "C-in" [label="0/10", fontsize=20];
+	"S2-out" -> "S2-in" [label="0/85", fontsize=20];
+	"S1-out" -> "A-in" [label="4/5", fontsize=20];
+	"S1-out" -> "S1-in" [label="0/85", fontsize=20];
+}

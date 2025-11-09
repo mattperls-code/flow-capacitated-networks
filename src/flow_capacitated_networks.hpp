@@ -61,6 +61,14 @@ class FlowCapacitatedNetwork
         void maximizeFlow();
 
         std::string toString();
+
+        std::string capacityGraphToDOT();
+        std::string flowGraphToDOT();
+        std::string residualGraphToDOT();
+
+        void exportCapacityGraph(std::string outputDirPath, std::string outputFileName);
+        void exportFlowGraph(std::string outputDirPath, std::string outputFileName);
+        void exportResidualGraph(std::string outputDirPath, std::string outputFileName);
 };
 
 #endif

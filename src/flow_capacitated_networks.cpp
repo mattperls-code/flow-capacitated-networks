@@ -3,6 +3,8 @@
 #include <queue>
 #include <algorithm>
 #include <vector>
+#include <filesystem>
+#include <fstream>
 
 #include "flow_capacitated_networks.hpp"
 
@@ -76,9 +78,11 @@ FlowCapacitatedNetwork::FlowCapacitatedNetwork(std::unordered_set<std::string> n
     
     for (const auto& edge : edges) {
         this->capacityMatrix[edge.start][edge.end] = edge.capacity;
+
         this->flowMatrix[edge.start][edge.end] = 0;
+
         this->residualMatrix[edge.start][edge.end] = edge.capacity;
-        this->residualMatrix[edge.end][edge.start] = 0;
+        if (!this->residualMatrix[edge.end].contains(edge.start)) this->residualMatrix[edge.end][edge.start] = 0;
     }
 };
 
@@ -425,4 +429,167 @@ std::string FlowCapacitatedNetwork::toString()
     // for (const auto& capacity : sortedResidualMatrix) output += capacity;
 
     return output;
+};
+
+std::string concatStrSet(std::unordered_set<std::string> strSet, std::string delimiter)
+{
+    std::string concat;
+    
+    for (auto str : strSet) concat += str + delimiter;
+    
+    if (!strSet.empty()) concat = concat.substr(0, concat.size() - delimiter.size());
+
+    return concat;
+};
+
+std::string FlowCapacitatedNetwork::capacityGraphToDOT()
+{
+    std::string output;
+
+    output += "digraph CapacityGraph {";
+    output += "\n";
+
+    output += "\trankdir=LR;";
+    output += "\n";
+    output += "\tnodesep=1.0;";
+    output += "\n";
+    output += "\tranksep=1.0;";
+    output += "\n";
+
+    output += "\t\"" + source + "\" [shape=circle, style=filled, fillcolor=lightblue, penwidth=3, fontsize=20];\n";
+    output += "\t\"" + terminal + "\" [shape=circle, style=filled, fillcolor=lightcoral, penwidth=3, fontsize=20];\n";
+
+    output += "\t{ rank=min; \"" + source + "\"; }\n";
+    output += "\t{ rank=max; \"" + terminal + "\"; }\n";
+
+    std::unordered_set<std::string> nodeDecls;
+    for (const auto& node : nodes) if (node != source && node != terminal) nodeDecls.insert("\t\"" + node + "\" [shape=circle, fontsize=20];");
+
+    output += concatStrSet(nodeDecls, "\n");
+    output += "\n";
+
+    std::unordered_set<std::string> edgeDotSet;
+    for (const auto& [start, edges] : this->capacityMatrix) {
+        for (auto& [end, capacity] : edges) {
+            if (capacity > 0) edgeDotSet.insert("\t\"" + start + "\" -> \"" + end + "\" [label=\"" + std::to_string(capacity) + "\", fontsize=20];");
+        }
+    }
+    output += concatStrSet(edgeDotSet, "\n");
+
+    output += "\n";
+    output += "}";
+
+    return output;
+};
+
+std::string FlowCapacitatedNetwork::flowGraphToDOT()
+{
+    std::string output;
+
+    output += "digraph FlowGraph {";
+    output += "\n";
+
+    output += "\trankdir=LR;";
+    output += "\n";
+    output += "\tnodesep=1.0;";
+    output += "\n";
+    output += "\tranksep=1.0;";
+    output += "\n";
+
+    output += "\t\"" + source + "\" [shape=circle, style=filled, fillcolor=lightblue, penwidth=3, fontsize=20];\n";
+    output += "\t\"" + terminal + "\" [shape=circle, style=filled, fillcolor=lightcoral, penwidth=3, fontsize=20];\n";
+
+    output += "\t{ rank=min; \"" + source + "\"; }\n";
+    output += "\t{ rank=max; \"" + terminal + "\"; }\n";
+
+    std::unordered_set<std::string> nodeDecls;
+    for (const auto& node : nodes) if (node != source && node != terminal) nodeDecls.insert("\t\"" + node + "\" [shape=circle, fontsize=20];");
+
+    output += concatStrSet(nodeDecls, "\n");
+    output += "\n";
+
+    std::unordered_set<std::string> edgeDotSet;
+    for (const auto& [start, edges] : this->capacityMatrix) {
+        for (auto& [end, capacity] : edges) {
+            if (capacity > 0) edgeDotSet.insert("\t\"" + start + "\" -> \"" + end + "\" [label=\"" + std::to_string(this->flowMatrix[start][end]) + "/" + std::to_string(capacity) + "\", fontsize=20];");
+        }
+    }
+    output += concatStrSet(edgeDotSet, "\n");
+
+    output += "\n";
+    output += "}";
+
+    return output;
+};
+
+std::string FlowCapacitatedNetwork::residualGraphToDOT()
+{
+    std::string output;
+
+    output += "digraph ResidualGraph {";
+    output += "\n";
+
+    output += "\trankdir=LR;";
+    output += "\n";
+    output += "\tnodesep=1.0;";
+    output += "\n";
+    output += "\tranksep=1.0;";
+    output += "\n";
+
+    output += "\t\"" + source + "\" [shape=circle, style=filled, fillcolor=lightblue, penwidth=3, fontsize=20];\n";
+    output += "\t\"" + terminal + "\" [shape=circle, style=filled, fillcolor=lightcoral, penwidth=3, fontsize=20];\n";
+
+    output += "\t{ rank=min; \"" + source + "\"; }\n";
+    output += "\t{ rank=max; \"" + terminal + "\"; }\n";
+
+    std::unordered_set<std::string> nodeDecls;
+    for (const auto& node : nodes) if (node != source && node != terminal) nodeDecls.insert("\t\"" + node + "\" [shape=circle, fontsize=20];");
+
+    output += concatStrSet(nodeDecls, "\n");
+    output += "\n";
+
+    std::unordered_set<std::string> edgeDotSet;
+    for (const auto& [start, edges] : this->residualMatrix) {
+        for (auto& [end, flow] : edges) {
+            if (flow > 0) edgeDotSet.insert("\t\"" + start + "\" -> \"" + end + "\" [label=\"" + std::to_string(flow) + "\", fontsize=20];");
+        }
+    }
+    output += concatStrSet(edgeDotSet, "\n");
+
+    output += "\n";
+    output += "}";
+
+    return output;
+};
+
+void exportGraph(std::string outputDirPath, std::string outputFileName, std::string dotFileStr)
+{
+    std::filesystem::create_directories(outputDirPath);
+
+    std::string dotOutputFilePath = outputDirPath + "/" + outputFileName + ".dot";
+
+    std::ofstream dotOutputFile(dotOutputFilePath);
+
+    dotOutputFile << dotFileStr;
+
+    dotOutputFile.close();
+
+    std::string renderDotFileCommand = "dot -Tpng " + dotOutputFilePath + " -o " + outputDirPath + "/" + outputFileName + ".png";
+
+    std::system(renderDotFileCommand.c_str());
+};
+
+void FlowCapacitatedNetwork::exportCapacityGraph(std::string outputDirPath, std::string outputFileName)
+{
+    exportGraph(outputDirPath, outputFileName, this->capacityGraphToDOT());
+};
+
+void FlowCapacitatedNetwork::exportFlowGraph(std::string outputDirPath, std::string outputFileName)
+{
+    exportGraph(outputDirPath, outputFileName, this->flowGraphToDOT());
+};
+
+void FlowCapacitatedNetwork::exportResidualGraph(std::string outputDirPath, std::string outputFileName)
+{
+    exportGraph(outputDirPath, outputFileName, this->residualGraphToDOT());
 };
