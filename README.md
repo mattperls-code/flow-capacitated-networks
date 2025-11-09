@@ -2,4 +2,4 @@
 
 Determine the max flow through various types of capacitated networks.
 
-Supports operations on edge and vertex capacitated networks, graph augmentation, min cut testing, and easy image export options.
+Supports operations on edge and vertex capacitated networks, residual graph generation, path augmentation, min cut testing, iterative flow maximization, and easy image export options.

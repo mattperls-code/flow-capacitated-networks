@@ -45,6 +45,29 @@ int getMaxCapacity(std::unordered_map<std::string, int> vertexCapacity, std::uno
     return std::max(getMaxCapacity(vertexCapacity), getMaxCapacity(edges));
 };
 
+int getTotalCapacity(std::unordered_map<std::string, int> vertexCapacity)
+{
+    int totalCapacity = 0;
+
+    for (const auto& [_, capacity] : vertexCapacity) totalCapacity += capacity;
+
+    return totalCapacity;
+};
+
+int getTotalCapacity(std::unordered_set<Edge> edges)
+{
+    int totalCapacity = 0;
+
+    for (const auto& edge : edges) totalCapacity += edge.capacity;
+
+    return totalCapacity;
+};
+
+int getTotalCapacity(std::unordered_map<std::string, int> vertexCapacity, std::unordered_set<Edge> edges)
+{
+    return getTotalCapacity(vertexCapacity) + getTotalCapacity(edges);
+};
+
 FlowCapacitatedNetwork::FlowCapacitatedNetwork(std::unordered_set<std::string> nodes, std::string source, std::string terminal, std::unordered_set<Edge> edges)
 {
     this->nodes = nodes;
@@ -129,10 +152,10 @@ FlowCapacitatedNetwork FlowCapacitatedNetwork::fromMultiBoundaryEdgeCapacitated(
     nodes.emplace("$S");
     nodes.emplace("$T");
 
-    int maxCapacity = getMaxCapacity(edges);
+    int totalCapacity = getTotalCapacity(edges);
 
-    for (const auto& source : sources) edges.emplace("$S", source, maxCapacity);
-    for (const auto& terminal : terminals) edges.emplace(terminal, "$T", maxCapacity);
+    for (const auto& source : sources) edges.emplace("$S", source, totalCapacity);
+    for (const auto& terminal : terminals) edges.emplace(terminal, "$T", totalCapacity);
 
     return fromEdgeCapacitated(nodes, "$S", "$T", edges);
 };
@@ -144,16 +167,16 @@ FlowCapacitatedNetwork FlowCapacitatedNetwork::fromMultiBoundaryVertexCapacitate
     nodes.emplace("$S");
     nodes.emplace("$T");
 
-    int maxCapacity = getMaxCapacity(vertexCapacity);
+    int totalCapacity = getTotalCapacity(vertexCapacity);
 
     for (const auto& source : sources) {
         edges.emplace("$S", source);
-        vertexCapacity[source] = maxCapacity;
+        vertexCapacity[source] = totalCapacity;
     }
 
     for (const auto& terminal : terminals) {
         edges.emplace(terminal, "$T");
-        vertexCapacity[terminal] = maxCapacity;
+        vertexCapacity[terminal] = totalCapacity;
     }
 
     return fromVertexCapacitated(nodes, "$S", "$T", edges, vertexCapacity);
@@ -166,16 +189,16 @@ FlowCapacitatedNetwork FlowCapacitatedNetwork::fromMultiBoundaryEdgeAndVertexCap
     nodes.emplace("$S");
     nodes.emplace("$T");
 
-    int maxCapacity = getMaxCapacity(vertexCapacity, edges);
+    int totalCapacity = getTotalCapacity(vertexCapacity, edges);
 
     for (const auto& source : sources) {
-        edges.emplace("$S", source, maxCapacity);
-        vertexCapacity[source] = maxCapacity;
+        edges.emplace("$S", source, totalCapacity);
+        vertexCapacity[source] = totalCapacity;
     }
 
     for (const auto& terminal : terminals) {
-        edges.emplace(terminal, "$T", maxCapacity);
-        vertexCapacity[terminal] = maxCapacity;
+        edges.emplace(terminal, "$T", totalCapacity);
+        vertexCapacity[terminal] = totalCapacity;
     }
 
     return fromEdgeAndVertexCapacitated(nodes, "$S", "$T", edges, vertexCapacity);
